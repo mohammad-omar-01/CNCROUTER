@@ -37,16 +37,27 @@
                 <button class="buttons" type="submit">Start</button>
             </form>
         </div>
+        <button id="autoLevel" onclick="jaavscript: callAutoLevel()">auto level</button>
             <pre id="percentage"></pre>
 
         <div class="response">
             <h2>Response:</h2>
             <pre id="responseText"></pre>
         </div>
+
+
+        <div class="response">
+            <h2>status Text:</h2>
+            <pre id="statusText"></pre>
+        </div>
+        <iframe src="http://localhost:3000/streaming.mpg" title="CNC PCB Machine"style="border:dotted 1mm"></iframe>
+
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.9/signalr.min.js"></script>
 
     <script src="script.js"></script>
+
 
 </body>
 </html>

@@ -1,5 +1,6 @@
 using GrblSpeaker.Utilites;
 using Microsoft.AspNetCore.Http.Features;
+using System.Device.Gpio;
 
 var builder = WebApplication.CreateBuilder(args);
 

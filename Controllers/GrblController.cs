@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.IO.Ports;
+using System.Device.Gpio;
+using System.Net.NetworkInformation;
 
 namespace ServeGrbl.Controllers
 {
@@ -7,18 +9,24 @@ namespace ServeGrbl.Controllers
     [ApiController]
     public class GrblController : ControllerBase
     {
-        private const string SerialPortName = "COM4";
+        private const string SerialPortName = "/dev/ttyACM0";
         private const int BaudRate = 115200;
         public bool readNextLine = true;
         static SerialPort serialPort;
         private int LINEnUMBER = 0;
         private static int CurrentLine = 0;
+        private static int sensorPin = 19;
         public static bool NotPused = true;
         static int i = 0;
         static double precentage;
         public static bool Stoped = false;
+        static GpioController controller = new GpioController();
+
 
         static List<string> lines = new List<string>();
+        public GrblController() {
+
+        }
 
         [HttpPost]
         public async Task<IActionResult> SendCommand([FromBody] string command)
@@ -66,19 +74,55 @@ namespace ServeGrbl.Controllers
         [HttpPost("Continue")]
         public async Task<IActionResult> Continue()
         {
+            
             if (!Stoped)
             {
                 NotPused = true;
                 serialPort = new SerialPort(SerialPortName, BaudRate);
-                Console.WriteLine("Program Continued by user  From line " + CurrentLine++);
+                Console.WriteLine("Program Continued by user  From line " + i++);
                 ProcessLine(serialPort);
-                return Ok("Program Continued by user  From line " + CurrentLine++);
+                return Ok("Program Continued by user  From line " + i++);
             }
             else
             {
                 Console.WriteLine("Cannot Be Continued, Program Has been Stopped ");
                 return Ok("Cannot Be Continued, Program Has been Stopped");
             }
+        }
+
+        [HttpPost("LevelIt")]
+        public async Task<IActionResult> Level()
+        {
+            if (!controller.IsPinOpen(sensorPin)) { 
+            controller.OpenPin(sensorPin, PinMode.Input);}
+            while (controller.Read(sensorPin) != PinValue.Low) {
+                if (!serialPort.IsOpen)
+                {
+                    serialPort.Open();
+                }
+                serialPort.WriteLine("$J=G91 G21 Z-0.1 F100");
+                Console.WriteLine("Leveling $J=G91 G21 Z-0.1 F100");
+                
+                Thread.Sleep(100);
+            
+            }
+            controller.ClosePin(sensorPin);
+            return Ok();
+        }
+        [HttpGet("Status")]
+        public async Task<IActionResult> getStatus()
+        {
+            if (!controller.IsPinOpen(sensorPin))
+            {
+                controller.OpenPin(sensorPin, PinMode.Input);
+            }
+
+
+            var status = controller.Read(sensorPin);
+
+
+            controller.ClosePin(sensorPin);
+            return Ok(status == PinValue.Low? "1" :"0" );
         }
 
 
@@ -99,6 +143,14 @@ namespace ServeGrbl.Controllers
                     lines.Add(line);
                     LINEnUMBER++;
                 }
+                if (Stoped) { 
+                Stoped= false;
+                }
+                if (NotPused == false) { 
+                NotPused = true;
+                }
+                Console.WriteLine("The File Will Be started From Line 0");
+
                 ProcessLine(serialPort);
 
                 return Ok("File content processed successfully.");
@@ -127,7 +179,7 @@ namespace ServeGrbl.Controllers
                         if (NotPused && !Stoped)
                         {
                             serialPort.WriteLine(line);
-                            var response = serialPort.ReadLine();
+                            var response =  serialPort.ReadLine();
                             response = response.Trim();
                             Console.WriteLine(response + " " + i);
                             double cnt = lines2.Count;
@@ -160,5 +212,7 @@ namespace ServeGrbl.Controllers
                 }
             }
         }
+
+
     }
 }
