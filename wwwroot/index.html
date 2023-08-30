@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRBL Controller</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>GRBL Controller</h1>
+        <div class="buttons">
+            <button id="configr">$$</button>
+
+            <button id="homing">$H</button>
+            <button id="unlock">$X</button>
+            <button id="xPlus">X+</button>
+            <button id="xMinus">X-</button>
+            <button id="yPlus">Y+</button>
+            <button id="yMinus">Y-</button>
+            <button id="zPlus">Z+</button>
+            <button id="zMinus">Z-</button>
+            @page
+@model GrblSpeaker.Pages.ControllerModel
+@{
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRBL Controller</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>GRBL Controller</h1>
+        <div class="buttons">
+            <button id="configrations" name ="$$">Configrations</button>
+            <button id="homing" name="$H">Homing</button>
+            <button id="unlock" name="$X">Unlock Machine</button>
+            <button id="xPlus" name="$J=G91 G21 X1 F100">X+</button>
+            <button id="xMinus" name="$J=G91 G21 X-1 F100">X-</button>
+            <button id="yPlus" name="$J=G91 G21 Y1 F100">Y+</button>
+            <button id="yMinus" name="$J=G91 G21 Y-1 F100">Y-</button>
+            <button id="zPlus" name="$J=G91 G21 Z1 F100">Z+</button>
+            <button id="zMinus" name="$J=G91 G21 Z-1 F100">Z-</button>
+           
+
+        </div>
+        <form id="fileUploadForm" class="form">
+            File: <input type="file" name="upload" />
+            <input type="submit" id="btn" />
+        </form>
+        <div class="response">
+            <h2>Response:</h2>
+            <pre id="responseText"></pre>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+        </div>
+        <div class="response">
+            <h2>Response:</h2>
+            <pre id="responseText"></pre>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
