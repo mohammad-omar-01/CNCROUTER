@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const buttons = document.querySelectorAll('.buttons button');
+
+
+    const buttons = document.querySelectorAll('.buttons .Control');
+
     buttons.forEach(button => {
         button.addEventListener('click', async function () {
             const command = this.name;
@@ -26,77 +29,45 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
-document.getElementById('fileUploadForm').addEventListener('submit', async function (event) {
-    event.preventDefault(); // Prevent form submission
+const uploadForm = document.getElementById('uploadForm');
+const fileInput = document.getElementById('fileInput');
+let started=false;
+uploadForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-    const fileInput = document.querySelector('input[type="file"]');
     const file = fileInput.files[0];
 
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = async function (e) {
-            const content = e.target.result;
-            const lines = content.split('\n');
+    if (!file) {
+        console.error('No file selected.');
+        return;
+    }
 
-            for (const line of lines) {
-                // Perform your POST API call for each line
-                if (line.trim() !== '') {
-                    try {
-                        if(document.getElementById('state').innerHTML=='ok') {
-                        await postDataWithResponseCheck(line, 1000);
-                        }
-                        else {
-                            console.error('Error making API call:', error);
-                            break;
-                        } // Delay of 1 second (1000 ms)
-                    } catch (error) {
-                        console.error('Error making API call:', error);
-                        break;
-                        // Stop sending commands if API call fails
-                    }
-                }
-            }
-        };
+    const formData = new FormData();
+    formData.append('file', file);
 
-        reader.readAsText(file);
+    try {
+        const response = await fetch('/api/grbl/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.ok) {
+            const result = await response.text();
+            console.log('File uploaded successfully:', result);
+started=true;
+        } else {
+            console.error('File upload failed:', response.statusText);
+        }
+    } catch (error) {
+        console.error('An error occurred:', error);
     }
 });
-async function postDataWithResponseCheck(data, delay) {
-    return new Promise(async (resolve, reject) => {
-        let responseReceived = false;
 
-
-        setTimeout(async () => {
-            try {
-                await postDataToApi(data);
-                responseReceived = true;
-                resolve();
-            } catch (error) {
-                reject(error);
-            }
-        }, delay);
-
-        // Poll for responseReceived status before proceeding to the next command
-        const pollInterval = 100; // Polling interval in milliseconds
-        const maxPollAttempts = 30; // Maximum number of polling attempts
-        let pollCount = 0;
-
-        const poll = setInterval(() => {
-            if (responseReceived || pollCount >= maxPollAttempts) {
-                clearInterval(poll);
-                if (!responseReceived) {
-                    reject(new Error(`API response not received for command: ${data}`));
-                }
-            }
-            pollCount++;
-        }, pollInterval);
-    });
-}
-
-async function postDataToApi(data) {
-    const command = data;
+const stop = document.getElementById('Stop').addEventListener('click', async function () {
+    const command = this.name;
     console.log('Sending command:', command);
-    const apiUrl = '/api/Grbl'
+    responseText.textContent = 'Sending command...';
+    const apiUrl = '/api/Grbl/Stop';
 
     try {
         const response = await fetch(apiUrl, {
@@ -104,22 +75,118 @@ async function postDataToApi(data) {
             headers: {
                 'Content-Type': 'application/json'
             },
-
-            body: JSON.stringify(command)
         });
         const data = await response.text();
-
-console.log(data);
-        if (data!=('ok')) {
-            document.getElementById('state').innerHTML = 'error';
-            throw new Error(`API request failed for command: ${data}`);
-        }
-    
+        responseText.textContent = data;
     } catch (error) {
         console.error('Error sending command:', error);
         responseText.textContent = 'Error sending command.';
     }
+});
+const Pause = document.getElementById('Pause').addEventListener('click', async function () {
+    const command = this.name;
+    console.log('Sending command:', command);
+    responseText.textContent = 'Sending command...';
+    const apiUrl = '/api/Grbl/Pause';
 
-    
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        const data = await response.text();
+        responseText.textContent = data;
+    } catch (error) {
+        console.error('Error sending command:', error);
+        responseText.textContent = 'Error sending command.';
+    }
+});
+const Continue = document.getElementById('Continue').addEventListener('click', async function () {
+    const command = this.name;
+    console.log('Sending command:', command);
+    responseText.textContent = 'Sending command...';
+    const apiUrl = '/api/Grbl/Continue';
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        const data = await response.text();
+        responseText.textContent = data;
+    } catch (error) {
+        console.error('Error sending command:', error);
+        responseText.textContent = 'Error sending command.';
+    }
+});
+const percentage = document.getElementById('percentage');
+
+function updatePercentage() {
+    fetch('/api/Grbl/percentage')
+        .then(response => response.text())
+        .then(data => {
+            const progress = parseFloat(data);
+
+            // Format the progress with two digits after the dot
+            const formattedProgress = progress.toFixed(2);
+
+            percentage.textContent = `Current Progress: ${formattedProgress}%`;
+
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+
+    // Call the updatePercentage function again after 30 seconds
+    setTimeout(updatePercentage, 5000); // 30 seconds in milliseconds
+}
+if(clicked)
+setInterval(fetchSensorStatus, 5000);
+
+
+const lastStatuses = [];
+let statusCounter = 0;
+const nStatuses = 5;
+function fetchSensorStatus() {
+    fetch('/api/Grbl/Status')
+        .then(response => response.text())
+        .then(status => {
+            lastStatuses[statusCounter++ % nStatuses] = status
+
+            const isMostLikelyOn = lastStatuses.some(x => x == 1);
+            statusText.textContent = `Current Sensor Status: ${status == 1 ? 'On' : 'Off'} most likely its ${isMostLikelyOn? 'Working Fine':'Something wrong'}`;
+
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+}
+if(clicked)
+updatePercentage();
+
+
+
+
+
+
+
+function callAutoLevel() {
+    fetch('/api/Grbl/LevelIt', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+})
+        .then(response => {
+            response.text();
+            console.log("Leveled Successfully");
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
 }
 
