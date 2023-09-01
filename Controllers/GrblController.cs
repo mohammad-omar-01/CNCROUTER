@@ -9,6 +9,8 @@ namespace ServeGrbl.Controllers
     public class GrblController : ControllerBase
     {
         private static string SerialPortName = "/dev/ttyS0";
+                private static string SerialPortName2 = "/dev/ttyUSB0";
+
         static int baudRate = 115200;
         static Parity parity = Parity.None;
         static int dataBits = 8;
@@ -16,10 +18,12 @@ namespace ServeGrbl.Controllers
         private const int BaudRate = 115200;
         public bool readNextLine = true;
         static SerialPort serialPort;
+                static SerialPort serialPort1;
+
         private int LINEnUMBER = 0;
         private static int CurrentLine = 0;
-        private static int sensorPin = 20;
-        private static int testpin = 17;
+        private static int sensorPin = 21;
+        private static int testpin = 20;
         public static bool NotPused = true;
         static int i = 0;
         static double precentage;
@@ -49,6 +53,7 @@ namespace ServeGrbl.Controllers
                     Console.WriteLine(response);
                     return Ok(response);
                 }
+return StatusCode(500,$"Problem in Serial, Maybe Arduino is Not Connected");
 
             }
             catch (Exception ex)
@@ -83,6 +88,7 @@ namespace ServeGrbl.Controllers
         public async Task<IActionResult> Stop()
         {
             Stoped = true;
+            SendSMS("HI");
             return Ok("Program Stoped");
         }
 
@@ -198,25 +204,26 @@ namespace ServeGrbl.Controllers
 
         private async Task SendSMS(string msg)
         {
-            serialPort.Open();
+            serialPort1 = new SerialPort(SerialPortName2, 9600, parity, dataBits, stopBits);
+            serialPort1.Open();
 
             // Clear any data in the receive buffer
-            serialPort.DiscardInBuffer();
+            serialPort1.DiscardInBuffer();
 
             // Send AT command to set up SMS mode
-            serialPort.WriteLine("AT+CMGF=1");
+            serialPort1.WriteLine("AT+CMGF=1");
             Thread.Sleep(1000);
 
             // Send AT command to set the recipient phone number
-            serialPort.WriteLine("AT+CMGS=\"RecipientPhoneNumber\"");
+            serialPort1.WriteLine("AT+CMGS=\"+970592935116\"");
             Thread.Sleep(1000);
 
             // Send the message content
-            serialPort.Write($"{msg}.\x1A");
+            serialPort1.Write($"{msg}.\x1A");
             Thread.Sleep(1000);
 
             // Close the serial port
-            serialPort.Close();
+            serialPort1.Close();
 
 
         }
@@ -229,7 +236,8 @@ namespace ServeGrbl.Controllers
                 controller.OpenPin(20, PinMode.Output);
 
             }
-            controller.Write(20, PinValue.High);
+	Console.WriteLine("Starting Spindle");
+            controller.Write(20, PinValue.Low);
             foreach (var line in lines2)
             {
                 if (NotPused && !Stoped)
@@ -249,9 +257,17 @@ namespace ServeGrbl.Controllers
                             double cnt = lines2.Count;
                             precentage = ((double)i / cnt) * 100;
                             i++;
-                            if (line.StartsWith("M30"))
+                            if (line.StartsWith("M30")||response.Contains("End"))
                             {
+  if (!controller.IsPinOpen(21))
+  {
+      controller.OpenPin(21, PinMode.Output);
+
+  }
+  controller.Write(21, PinValue.High);
+Thread.Sleep(5000);
                                 Console.WriteLine("Program Finished");
+				SendSMS("YOUR PCB IS READY :");
                                 if (serialPort.IsOpen)
                                 {
                                     serialPort.Close();
@@ -262,6 +278,20 @@ namespace ServeGrbl.Controllers
                             if (response.StartsWith("error") || response.StartsWith("Alarm"))
                             {
                                 CurrentLine = i;
+				SendSMS($"Machine Has Been Stoped :{response}");
+  if (!controller.IsPinOpen(20))
+  {
+      controller.OpenPin(20, PinMode.Output);
+
+  }
+  controller.Write(20, PinValue.Low);
+  if (!controller.IsPinOpen(21))
+  {
+      controller.OpenPin(21, PinMode.Output);
+
+  }
+  controller.Write(21, PinValue.High);
+Thread.Sleep(5000);
                                 if (serialPort.IsOpen)
                                 {
                                     serialPort.Close();
@@ -286,6 +316,12 @@ namespace ServeGrbl.Controllers
                 {
                     CurrentLine = 0;
                     Console.WriteLine("Program Stopped by user  At line " + i);
+  if (!controller.IsPinOpen(20))
+  {
+      controller.OpenPin(20, PinMode.Output);
+
+  }
+  controller.Write(20, PinValue.Low);
                     if (serialPort.IsOpen)
                     {
                         serialPort.Close();
