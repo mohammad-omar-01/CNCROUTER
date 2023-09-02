@@ -32,7 +32,7 @@ namespace ServeGrbl.Controllers
         static double precentage;
         public static bool Stoped = false;
         static GpioController controller = new GpioController();
-       
+        
 
 
         static List<string> lines = new List<string>();
@@ -181,7 +181,7 @@ namespace ServeGrbl.Controllers
                 serialPort = new SerialPort(SerialPortName, baudRate, parity, dataBits, stopBits);
                 Console.WriteLine("Program Continued by user  From line " + i++);
                 ProcessLine(serialPort);
-                return Ok("Program Continued by user  From line " + i);
+                return Ok("Program Continued by user  From line " + i++);
             }
             else
             {
@@ -370,25 +370,14 @@ Console.WriteLine(response + " " + i);
                             if (line.StartsWith("M30")||response.Contains("End"))
                             {
 SendSMS("Your PCB Is Ready :)");
-if(!controller.IsPinOpen(20)){
-controller.OpenPin(20,PinMode.Output);
-}
-controller.Write(20,PinValue.High);
-controller.ClosePin(20);
                                   if (!controller.IsPinOpen(21))
                                   {
                                       controller.OpenPin(21, PinMode.Output);
 
                                   }
                                 	  controller.Write(21, PinValue.Low);
-                                	Thread.Sleep(1000);
-					controller.Write(21,PinValue.High);
-controller.Write(21,PinValue.High);
-Thread.Sleep(1000);
-controller.Write(21,PinValue.Low);
-Thread.Sleep(1000);
-controller.Write(21,PinValue.High);
-                                
+                                	Thread.Sleep(3000);
+					controller.Write(21,PinValue.High);                                
 				var settings = Settings.CreateDefaultSettings();
 
                                 // Use 16 LEDs and GPIO Pin 18.
@@ -420,7 +409,7 @@ controller.Write(21,PinValue.High);
                                 break;
                             }
 
-                            if (response.StartsWith("error") || response.StartsWith("ALARM"))
+                            if (response.StartsWith("error") || response.StartsWith("Alarm"))
                             {
                                 CurrentLine = i;
                                 var settings = Settings.CreateDefaultSettings();
@@ -451,9 +440,8 @@ controller.Write(21,PinValue.High);
                                   controller.OpenPin(20, PinMode.Output);
 
                               }
-                              controller.Write(20, PinValue.High);
+                              controller.Write(20, PinValue.Low);
                                 Thread.Sleep(300);
-controller.ClosePin(20);
 
                                 if (!controller.IsPinOpen(21))
                               {
@@ -461,24 +449,11 @@ controller.ClosePin(20);
 
                               }
                               controller.Write(21, PinValue.Low);
-                            Thread.Sleep(1000);
-controller.Write(21,PinValue.High);
-Thread.Sleep(1000);
-controller.Write(21,PinValue.Low);
-Thread.Sleep(1000);
-controller.Write(21,PinValue.High);
-  if (!controller.IsPinOpen(21))
-  {
-      controller.OpenPin(21, PinMode.Input);
-
-  }
-  controller.Write(21, PinValue.High);
-  controller.ClosePin(21);
+                            Thread.Sleep(5000);
                                 if (serialPort.IsOpen)
                                 {
                                     serialPort.Close();
                                 }
-
                                 break;
                             }
 
