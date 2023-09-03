@@ -4,6 +4,7 @@ using rpi_ws281x;
 using System.Threading;
 using System.Drawing;
 using System.IO.Ports;
+using System.Threading.Channels;
 
 namespace ServeGrbl.Controllers
 {
@@ -77,32 +78,7 @@ namespace ServeGrbl.Controllers
             if (!Stoped && processing)
             {
                 NotPused = false;
-<<<<<<< HEAD
                 SetColor(Color.RosyBrown);
-=======
-                var settings = Settings.CreateDefaultSettings();
-
-                // Use 16 LEDs and GPIO Pin 18.
-                // Set brightness to maximum (255)
-                // Use Unknown as strip type. Then the type will be set in the native assembly.
-                settings.Channels[0] = new Channel(29, 18, 255, false, StripType.WS2812_STRIP);
-                using (var rpi = new WS281x(settings))
-                {
-                  
-
-                    // Set the LED colors.
-                    for (int i = 0; i < 29; i++)
-                    {
-                        rpi.SetLEDColor(0, i, Color.Purple);
-                    }
-
-                    // Render the LED colors.
-                    rpi.Render();
-
-                    // Sleep for a few seconds to display the colors.
-                    Thread.Sleep(5000);
-                }
->>>>>>> 9e4716efa921024701ba7a1b8b073c741f2be350
                 Console.WriteLine("Program Paused by user  At line " + i);
                 return Ok("Program Paused by user  At line " + i);
             }
@@ -129,18 +105,7 @@ namespace ServeGrbl.Controllers
                 return Ok("Program Stoped");
 
             }
-<<<<<<< HEAD
             return Ok("Program Hasn't been started Yet");
-=======
-  if (!controller.IsPinOpen(20))
-  {
-      controller.OpenPin(20, PinMode.Input);
-
-  }
-  controller.Write(20, PinValue.High);
-  controller.ClosePin(20);
-            return Ok("Program Stoped");
->>>>>>> 9e4716efa921024701ba7a1b8b073c741f2be350
         }
 
         [HttpPost("Continue")]
@@ -154,7 +119,7 @@ namespace ServeGrbl.Controllers
                 serialPort = new SerialPort(SerialPortName, baudRate, parity, dataBits, stopBits);
                 Console.WriteLine("Program Continued by user  From line " + i++);
                 ProcessLine(serialPort);
-                return Ok("Program Continued by user  From line " + i);
+                return Ok("Program Continued by user  From line " + i++);
             }
             else
             {
@@ -304,15 +269,17 @@ namespace ServeGrbl.Controllers
                 Thread.Sleep(5000);
             }
         }
-        async void Read_IR() {
-            List <PinValue> pins = new List <PinValue>();
-            for(int i = 0;i < 3;i++)
-            { 
-            pins.Add(PinValue.Low);
+        async void Read_IR()
+        {
+            List<PinValue> pins = new List<PinValue>();
+            for (int i = 0; i < 3; i++)
+            {
+                pins.Add(PinValue.Low);
             }
 
-            if (controller.IsPinOpen(26)) {
-                pins[0]=controller.Read(26);
+            if (controller.IsPinOpen(26))
+            {
+                pins[0] = controller.Read(26);
             }
             if (controller.IsPinOpen(19))
             {
@@ -322,7 +289,7 @@ namespace ServeGrbl.Controllers
             {
                 pins[2] = controller.Read(13);
             }
-            if(pins.Any(x=>x.Equals(PinValue.High)))
+            if (pins.Any(x => x.Equals(PinValue.High)))
             {
                 IRSencorOK = false;
             }
@@ -345,9 +312,7 @@ namespace ServeGrbl.Controllers
             }
             Console.WriteLine("Starting Spindle");
             controller.Write(20, PinValue.Low);
-controller.ClosePin(20);
-var allowed=true;   
-         foreach (var line in lines2)
+            foreach (var line in lines2)
             {
                 Read_IR();
 
@@ -360,56 +325,19 @@ var allowed=true;
                             serialPort.Open();
 
                         }
-                        if (NotPused && !Stoped&&IRSencorOK)
+                        if (NotPused && !Stoped && IRSencorOK)
                         {
                             processing = true;
                             serialPort.WriteLine(line);
                             var response = serialPort.ReadLine();
                             response = response.Trim();
-  if (response.StartsWith("ok")) {
-      allowed = true;
-  }
-  else
-  {
-      allowed = false;
-  }                            
-Console.WriteLine(response + " " + i);
+                            Console.WriteLine(response + " " + i);
                             double cnt = lines2.Count;
                             precentage = ((double)i / cnt) * 100;
                             i++;
                             if (line.StartsWith("M30") || response.Contains("End"))
                             {
-<<<<<<< HEAD
                                 if (!controller.IsPinOpen(21))
-=======
-SendSMS("Your PCB Is Ready :)");
-if(!controller.IsPinOpen(20)){
-controller.OpenPin(20,PinMode.Output);
-}
-controller.Write(20,PinValue.High);
-controller.ClosePin(20);
-                                  if (!controller.IsPinOpen(21))
-                                  {
-                                      controller.OpenPin(21, PinMode.Output);
-
-                                  }
-                                	  controller.Write(21, PinValue.Low);
-                                	Thread.Sleep(1000);
-					controller.Write(21,PinValue.High);
-controller.Write(21,PinValue.High);
-Thread.Sleep(1000);
-controller.Write(21,PinValue.Low);
-Thread.Sleep(1000);
-controller.Write(21,PinValue.High);
-                                
-				var settings = Settings.CreateDefaultSettings();
-
-                                // Use 16 LEDs and GPIO Pin 18.
-                                // Set brightness to maximum (255)
-                                // Use Unknown as strip type. Then the type will be set in the native assembly.
-                                settings.Channels[0] = new Channel(29, 18, 255, false, StripType.WS2812_STRIP);
-                                using (var rpi = new WS281x(settings))
->>>>>>> 9e4716efa921024701ba7a1b8b073c741f2be350
                                 {
                                     controller.OpenPin(21, PinMode.Output);
 
@@ -418,12 +346,8 @@ controller.Write(21,PinValue.High);
                                 Thread.Sleep(3000);
                                 SetColor(Color.Blue);
                                 Console.WriteLine("Program Finished");
-<<<<<<< HEAD
                                 SendSMS("YOUR PCB IS READY :");
 
-=======
-				        
->>>>>>> 9e4716efa921024701ba7a1b8b073c741f2be350
                                 if (serialPort.IsOpen)
                                 {
                                     serialPort.Close();
@@ -435,7 +359,7 @@ controller.Write(21,PinValue.High);
                                 break;
                             }
 
-                            if (response.StartsWith("error") || response.StartsWith("ALARM"))
+                            if (response.StartsWith("error") || response.StartsWith("Alarm"))
                             {
                                 CurrentLine = i;
                                 SetColor(Color.Red);
@@ -444,46 +368,21 @@ controller.Write(21,PinValue.High);
                                 {
                                     controller.OpenPin(20, PinMode.Output);
 
-<<<<<<< HEAD
                                 }
                                 controller.Write(20, PinValue.Low);
-=======
-                              }
-                              controller.Write(20, PinValue.High);
->>>>>>> 9e4716efa921024701ba7a1b8b073c741f2be350
                                 Thread.Sleep(300);
-controller.ClosePin(20);
 
                                 if (!controller.IsPinOpen(21))
                                 {
                                     controller.OpenPin(21, PinMode.Output);
 
-<<<<<<< HEAD
                                 }
                                 controller.Write(21, PinValue.Low);
                                 Thread.Sleep(5000);
-=======
-                              }
-                              controller.Write(21, PinValue.Low);
-                            Thread.Sleep(1000);
-controller.Write(21,PinValue.High);
-Thread.Sleep(1000);
-controller.Write(21,PinValue.Low);
-Thread.Sleep(1000);
-controller.Write(21,PinValue.High);
-  if (!controller.IsPinOpen(21))
-  {
-      controller.OpenPin(21, PinMode.Input);
-
-  }
-  controller.Write(21, PinValue.High);
-  controller.ClosePin(21);
->>>>>>> 9e4716efa921024701ba7a1b8b073c741f2be350
                                 if (serialPort.IsOpen)
                                 {
                                     serialPort.Close();
                                 }
-
                                 break;
                             }
 
