@@ -4,7 +4,6 @@ using rpi_ws281x;
 using System.Threading;
 using System.Drawing;
 using System.IO.Ports;
-using System.Threading.Channels;
 
 namespace ServeGrbl.Controllers
 {
@@ -119,7 +118,7 @@ namespace ServeGrbl.Controllers
                 serialPort = new SerialPort(SerialPortName, baudRate, parity, dataBits, stopBits);
                 Console.WriteLine("Program Continued by user  From line " + i++);
                 ProcessLine(serialPort);
-                return Ok("Program Continued by user  From line " + i++);
+                return Ok("Program Continued by user  From line " + i);
             }
             else
             {
@@ -312,7 +311,9 @@ namespace ServeGrbl.Controllers
             }
             Console.WriteLine("Starting Spindle");
             controller.Write(20, PinValue.Low);
-            foreach (var line in lines2)
+controller.ClosePin(20);
+var allowed=true;   
+         foreach (var line in lines2)
             {
                 Read_IR();
 
@@ -331,7 +332,14 @@ namespace ServeGrbl.Controllers
                             serialPort.WriteLine(line);
                             var response = serialPort.ReadLine();
                             response = response.Trim();
-                            Console.WriteLine(response + " " + i);
+  if (response.StartsWith("ok")) {
+      allowed = true;
+  }
+  else
+  {
+      allowed = false;
+  }                            
+Console.WriteLine(response + " " + i);
                             double cnt = lines2.Count;
                             precentage = ((double)i / cnt) * 100;
                             i++;
@@ -359,7 +367,7 @@ namespace ServeGrbl.Controllers
                                 break;
                             }
 
-                            if (response.StartsWith("error") || response.StartsWith("Alarm"))
+                            if (response.StartsWith("error") || response.StartsWith("ALARM"))
                             {
                                 CurrentLine = i;
                                 SetColor(Color.Red);
@@ -371,6 +379,7 @@ namespace ServeGrbl.Controllers
                                 }
                                 controller.Write(20, PinValue.Low);
                                 Thread.Sleep(300);
+controller.ClosePin(20);
 
                                 if (!controller.IsPinOpen(21))
                                 {
@@ -383,6 +392,7 @@ namespace ServeGrbl.Controllers
                                 {
                                     serialPort.Close();
                                 }
+
                                 break;
                             }
 
