@@ -22,7 +22,6 @@ namespace ServeGrbl.Controllers
         public bool readNextLine = true;
         static SerialPort serialPort;
         static SerialPort serialPort1;
-
         private int LINEnUMBER = 0;
         private static int CurrentLine = 0;
         private static int sensorPin = 21;
@@ -311,9 +310,9 @@ namespace ServeGrbl.Controllers
             }
             Console.WriteLine("Starting Spindle");
             controller.Write(20, PinValue.Low);
-controller.ClosePin(20);
-var allowed=true;   
-         foreach (var line in lines2)
+            controller.ClosePin(20);
+            var allowed = true;
+            foreach (var line in lines2)
             {
                 Read_IR();
 
@@ -332,37 +331,44 @@ var allowed=true;
                             serialPort.WriteLine(line);
                             var response = serialPort.ReadLine();
                             response = response.Trim();
-  if (response.StartsWith("ok")) {
-      allowed = true;
-  }
-  else
-  {
-      allowed = false;
-  }                            
-Console.WriteLine(response + " " + i);
+                            if (response.StartsWith("ok"))
+                            {
+                                allowed = true;
+                            }
+                            else
+                            {
+                                allowed = false;
+                            }
+                            Console.WriteLine(response + " " + i);
                             double cnt = lines2.Count;
                             precentage = ((double)i / cnt) * 100;
                             i++;
                             if (line.StartsWith("M30") || response.Contains("End"))
                             {
+                                if (!controller.IsPinOpen(20))
+                                {
+                                    controller.OpenPin(20, PinMode.Input);
+
+                                }
+                                controller.Write(20, PinValue.High);
+                                controller.ClosePin(20);
+                                SetColor(Color.Blue);
+                                SendSMS("YOUR PCB IS READY :");
                                 if (!controller.IsPinOpen(21))
                                 {
                                     controller.OpenPin(21, PinMode.Output);
 
                                 }
                                 controller.Write(21, PinValue.Low);
-                                Thread.Sleep(3000);
-                                SetColor(Color.Blue);
+                                Thread.Sleep(1000);
+                                controller.Write(21, PinValue.High);
                                 Console.WriteLine("Program Finished");
-                                SendSMS("YOUR PCB IS READY :");
 
                                 if (serialPort.IsOpen)
                                 {
                                     serialPort.Close();
                                 }
-                                Thread.Sleep(3000);
                                 SetColor(Color.Green);
-
 
                                 break;
                             }
@@ -370,16 +376,15 @@ Console.WriteLine(response + " " + i);
                             if (response.StartsWith("error") || response.StartsWith("ALARM"))
                             {
                                 CurrentLine = i;
-                                SetColor(Color.Red);
-                                SendSMS($"Machine Has Been Stoped :{response}");
                                 if (!controller.IsPinOpen(20))
                                 {
                                     controller.OpenPin(20, PinMode.Output);
 
                                 }
-                                controller.Write(20, PinValue.Low);
-                                Thread.Sleep(300);
-controller.ClosePin(20);
+                                controller.Write(20, PinValue.High);
+                                SetColor(Color.Red);
+                                SendSMS($"Machine Has Been Stoped :{response}");
+                                controller.ClosePin(20);
 
                                 if (!controller.IsPinOpen(21))
                                 {
@@ -387,7 +392,27 @@ controller.ClosePin(20);
 
                                 }
                                 controller.Write(21, PinValue.Low);
-                                Thread.Sleep(5000);
+                                Thread.Sleep(1000);
+                                if (!controller.IsPinOpen(21))
+                                {
+                                    controller.OpenPin(21, PinMode.Output);
+
+                                }
+                                controller.Write(21, PinValue.High);
+                                Thread.Sleep(1000);
+                                if (!controller.IsPinOpen(21))
+                                {
+                                    controller.OpenPin(21, PinMode.Output);
+
+                                }
+                                controller.Write(21, PinValue.Low);
+                                Thread.Sleep(1000);
+                                if (!controller.IsPinOpen(21))
+                                {
+                                    controller.OpenPin(21, PinMode.Output);
+
+                                }
+                                controller.Write(21, PinValue.High);
                                 if (serialPort.IsOpen)
                                 {
                                     serialPort.Close();
@@ -418,7 +443,7 @@ controller.ClosePin(20);
                         controller.OpenPin(20, PinMode.Output);
 
                     }
-                    controller.Write(20, PinValue.Low);
+                    controller.Write(20, PinValue.High);
                     if (serialPort.IsOpen)
                     {
                         serialPort.Close();
@@ -431,7 +456,7 @@ controller.ClosePin(20);
                 controller.OpenPin(20, PinMode.Input);
 
             }
-            controller.Write(20, PinValue.Low);
+            controller.Write(20, PinValue.High);
             controller.ClosePin(20);
             if (serialPort.IsOpen)
             {

@@ -1,26 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRBL Controller</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>GRBL Controller</h1>
-        <div class="buttons">
-            <button id="configr">$$</button>
-
-            <button id="homing">$H</button>
-            <button id="unlock">$X</button>
-            <button id="xPlus">X+</button>
-            <button id="xMinus">X-</button>
-            <button id="yPlus">Y+</button>
-            <button id="yMinus">Y-</button>
-            <button id="zPlus">Z+</button>
-            <button id="zMinus">Z-</button>
-            @page
+@page
 @model GrblSpeaker.Pages.ControllerModel
 @{
 }
@@ -29,45 +7,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRBL Controller</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>CNC Controller</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>GRBL Controller</h1>
+        <h1>CNC Controller</h1>
         <div class="buttons">
-            <button id="configrations" name ="$$">Configrations</button>
-            <button id="homing" name="$H">Homing</button>
-            <button id="unlock" name="$X">Unlock Machine</button>
-            <button id="xPlus" name="$J=G91 G21 X1 F100">X+</button>
-            <button id="xMinus" name="$J=G91 G21 X-1 F100">X-</button>
-            <button id="yPlus" name="$J=G91 G21 Y1 F100">Y+</button>
-            <button id="yMinus" name="$J=G91 G21 Y-1 F100">Y-</button>
-            <button id="zPlus" name="$J=G91 G21 Z1 F100">Z+</button>
-            <button id="zMinus" name="$J=G91 G21 Z-1 F100">Z-</button>
-           
+            <button class="Control" id="configrations" name="$$">Configrations</button>
+            <button class="Control" id="homing" name="$H">Homing</button>
+            <button class="Control" id="unlock" name="$X">Unlock Machine</button>
+            <div>
+                <button class="Control" id="xPlus" name="$J=G91 G21 X1 F100">X+</button>
+                <button class="Control" id="xMinus" name="$J=G91 G21 X-1 F100">X-</button>
+                <button class="Control" id="xPlus" name="$J=G91 G21 X10 F100">X+10</button>
+                <button class="Control" id="xMinus" name="$J=G91 G21 X-10 F100">X-10</button>
+                <button class="Control" id="xPlus" name="$J=G91 G21 X5 F100">X+5</button>
+                <button class="Control" id="xMinus" name="$J=G91 G21 X-5 F100">X-5</button>
+            </div>
+            <button class="Control" id="yPlus" name="$J=G91 G21 Y1 F100">Y+</button>
+            <button class="Control" id="yMinus" name="$J=G91 G21 Y-1 F100">Y-</button>
+            <button class="Control" id="zPlus" name="$J=G91 G21 Z1 F100">Z+</button>
+            <button class="Control" id="zMinus" name="$J=G91 G21 Z-1 F100">Z-</button>
+            <button class="Control" id="zMinushalf" name="$J=G91 G21 Z-0.5 F100">Z- .5</button>
+            <button class="Control" id="SetZero" name="G10 P0 L20 X0 Y0 Z0">SetZero</button>
+            <button class="Control" id="Return to Zero" name="G00 X0 Y0 Z0">Return to Zero</button>
 
         </div>
-        <form id="fileUploadForm" class="form">
-            File: <input type="file" name="upload" />
-            <input type="submit" id="btn" />
-        </form>
+        <div class="buttons">
+            <button id="Stop" name="Stop">Stop</button>
+            <button id="Pause" name="Pause">Pause</button>
+            <button id="Continue" name="Continue">Continue</button>
+        </div>
+        <div class="buttons">
+            <button id="portSelectButton">SelectPort</button>
+
+        </div>
+        <div>
+            <form id="uploadForm">
+                <input type="file" id="fileInput" accept=".txt,.csv,.pdf">
+                <button class="buttons" type="submit">Start</button>
+            </form>
+        </div>
+        <button id="autoLevel" onclick="jaavscript: callAutoLevel()">auto level</button>
+        <pre id="percentage"></pre>
+
         <div class="response">
             <h2>Response:</h2>
             <pre id="responseText"></pre>
         </div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
 
 
-        </div>
         <div class="response">
-            <h2>Response:</h2>
-            <pre id="responseText"></pre>
+            <h2>status Text:</h2>
+            <pre id="statusText"></pre>
         </div>
+        <iframe src="/streaming.mpg" title="CNC PCB Machine" style="width:90vw; height: 600px; border:dotted 1mm"></iframe>
+
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.9/signalr.min.js"></script>
+
     <script src="script.js"></script>
+
+
 </body>
 </html>
+

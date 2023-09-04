@@ -14,11 +14,17 @@
     <div class="container">
         <h1>CNC Controller</h1>
         <div class="buttons">
-            <button class ="Control" id="configrations" name ="$$">Configrations</button>
+            <button class="Control" id="configrations" name="$$">Configrations</button>
             <button class="Control" id="homing" name="$H">Homing</button>
             <button class="Control" id="unlock" name="$X">Unlock Machine</button>
-            <button class="Control" id="xPlus" name="$J=G91 G21 X1 F100">X+</button>
-            <button class="Control" id="xMinus" name="$J=G91 G21 X-1 F100">X-</button>
+            <div>
+                <button class="Control" id="xPlus" name="$J=G91 G21 X1 F100">X+</button>
+                <button class="Control" id="xMinus" name="$J=G91 G21 X-1 F100">X-</button>
+                <button class="Control" id="xPlus" name="$J=G91 G21 X10 F100">X+10</button>
+                <button class="Control" id="xMinus" name="$J=G91 G21 X-10 F100">X-10</button>
+                <button class="Control" id="xPlus" name="$J=G91 G21 X5 F100">X+5</button>
+                <button class="Control" id="xMinus" name="$J=G91 G21 X-5 F100">X-5</button>
+            </div>
             <button class="Control" id="yPlus" name="$J=G91 G21 Y1 F100">Y+</button>
             <button class="Control" id="yMinus" name="$J=G91 G21 Y-1 F100">Y-</button>
             <button class="Control" id="zPlus" name="$J=G91 G21 Z1 F100">Z+</button>
@@ -34,7 +40,7 @@
             <button id="Continue" name="Continue">Continue</button>
         </div>
         <div class="buttons">
-            <button id="portSelectButton" >SelectPort</button>
+            <button id="portSelectButton">SelectPort</button>
 
         </div>
         <div>
@@ -44,7 +50,7 @@
             </form>
         </div>
         <button id="autoLevel" onclick="jaavscript: callAutoLevel()">auto level</button>
-            <pre id="percentage"></pre>
+        <pre id="percentage"></pre>
 
         <div class="response">
             <h2>Response:</h2>
